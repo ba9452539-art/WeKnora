@@ -19,7 +19,7 @@ permissions:
 
 env:
   GO_VERSION: "1.26"
-   GOSUMDB: off
+  GOSUMDB: off
   NODE_VERSION: "22"
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: "true"
 
