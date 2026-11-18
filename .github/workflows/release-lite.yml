@@ -217,7 +217,7 @@ jobs:
         shell: bash
         run: |
           export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn
-          export CGO_CFLAGS="-Wno-deprecated-declarations" -I$HOME/sqlite-inc
+          export CGO_CFLAGS="-Wno-deprecated-declarations -I$HOME/sqlite-inc" 
           cd cmd/desktop
           go build -p 1 -buildvcs=false -tags "desktop,sqlite_fts5,production" -o _prebuild_tmp.exe . || true
           rm -f _prebuild_tmp.exe
