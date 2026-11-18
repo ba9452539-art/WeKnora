@@ -169,6 +169,11 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Disable Defender (Windows CI)
+        if: runner.os == 'Windows'
+        shell: powershell
+        run: Set-MpPreference -DisableRealtimeMonitoring $true
+
       - uses: actions/setup-go@v6
         with:
           go-version: ${{ env.GO_VERSION }}
