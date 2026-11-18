@@ -204,10 +204,11 @@ jobs:
         if: runner.os == 'Windows'
         shell: bash
         run: |
-          mkdir -p "$HOME/sqlite-inc"
+          mkdir -p /c/sqlite-inc
           curl -L -o /tmp/sqlite.zip https://www.sqlite.org/2024/sqlite-amalgamation-3450100.zip
           unzip -o /tmp/sqlite.zip -d /tmp
-          cp /tmp/sqlite-amalgamation-*/sqlite3.h "$HOME/sqlite-inc/"
+          cp /tmp/sqlite-amalgamation-*/sqlite3.h /c/sqlite-inc/
+          cp /tmp/sqlite-amalgamation-*/sqlite3ext.h /c/sqlite-inc/ || true
 
       - name: Resolve version
         id: ver
@@ -225,7 +226,7 @@ jobs:
         shell: bash
         run: |
           export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn
-          export CGO_CFLAGS="-Wno-deprecated-declarations -I$HOME/sqlite-inc" 
+          export CGO_CFLAGS="-Wno-deprecated-declarations -IC:/sqlite-inc" 
           cd cmd/desktop
           go build -p 1 -buildvcs=false -tags "desktop,sqlite_fts5,production" -o _prebuild_tmp.exe . || true
           rm -f _prebuild_tmp.exe
@@ -237,7 +238,7 @@ jobs:
           export GOLANG_PROTOBUF_REGISTRATION_CONFLICT=warn
           eval "$(./scripts/get_version.sh env)"
           LDFLAGS="$(./scripts/get_version.sh ldflags) -X 'google.golang.org/protobuf/reflect/protoregistry.conflictPolicy=warn'"
-          export CGO_CFLAGS="-Wno-deprecated-declarations -I$HOME/sqlite-inc"
+          export CGO_CFLAGS="-Wno-deprecated-declarations -IC:/sqlite-inc"
 
           BUILD_TAGS="sqlite_fts5"
           NSIS_FLAG=""
