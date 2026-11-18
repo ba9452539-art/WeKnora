@@ -322,6 +322,30 @@ jobs:
           tar czf "${ARCHIVE}.tar.gz" "${ARCHIVE}"
           shasum -a 256 "${ARCHIVE}.tar.gz" > "${ARCHIVE}.tar.gz.sha256"
 
+      # ── Windows: assemble a ready-to-run portable folder (exe + web + config + migrations) ──
+      - name: Assemble portable package (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          if (-not (Test-Path frontend\dist)) {
+            Push-Location frontend
+            npm ci
+            npm run build
+            Pop-Location
+          }
+          $v = "${{ steps.ver.outputs.version }}"
+          $out = "WeKnora-Lite_${v}_portable_windows_amd64"
+          New-Item -ItemType Directory -Force portable\config, portable\migrations\sqlite, portable\web | Out-Null
+          Copy-Item "cmd/desktop/build/bin/WeKnora Lite.exe" portable\
+          Copy-Item config\* portable\config -Recurse -Force
+          Copy-Item migrations\sqlite\* portable\migrations\sqlite -Recurse -Force
+          Copy-Item frontend\dist\* portable\web -Recurse -Force
+          if (Test-Path licenses) { Copy-Item licenses portable\licenses -Recurse -Force }
+          if (Test-Path .env.lite.example) { Copy-Item .env.lite.example portable\ }
+          Compress-Archive -Path portable\* -DestinationPath "$out.zip" -Force
+          $h = (Get-FileHash "$out.zip" -Algorithm SHA256).Hash.ToLower()
+          Set-Content -Path "$out.zip.sha256" -Value "$h  $out.zip"
+
       # ── Windows: NSIS installer includes licenses and corresponding source ──
       - name: Package Windows app
         if: runner.os == 'Windows'
@@ -342,6 +366,8 @@ jobs:
           name: ${{ matrix.artifact_name }}
           path: |
             WeKnora-Lite-App_*
+            WeKnora-Lite_*.zip
+            WeKnora-Lite_*.zip.sha256
           retention-days: 3
 
   # ── 3. Create GitHub Release ──
