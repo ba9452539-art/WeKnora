@@ -169,10 +169,12 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
-      - name: Disable Defender (Windows CI)
+      - name: Normalize line endings (Windows)
         if: runner.os == 'Windows'
-        shell: powershell
-        run: Set-MpPreference -DisableRealtimeMonitoring $true
+        shell: bash
+        run: |
+          git config --global core.autocrlf false
+          sed -i 's/\r$//' licenses/sources/modules.tsv
 
       - uses: actions/setup-go@v6
         with:
